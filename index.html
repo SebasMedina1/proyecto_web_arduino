@@ -106,6 +106,10 @@
         } else if (data.sensor === "MQ-137") {
             tarjetaSensor = document.getElementById('sensor-mq137');
             document.getElementById('mq137_value').innerText = data.gas_level;
+        }else if (data.sensor === "DHT22_temperatura") {
+        document.getElementById('temp_value').innerText = data.gas_level;  // Actualizar temperatura
+        } else if (data.sensor === "DHT22_humedad") {
+            document.getElementById('humidity_value').innerText = data.gas_level;  // Actualizar humedad
         }
 
         // Comprobar los rangos para definir el color de la tarjeta
