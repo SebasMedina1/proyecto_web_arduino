@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanAir</title>
+    <link rel="stylesheet" href="CSS/estilos.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <h2 class="titulo">CleanAir</h2>
+    <h1 class="titulo2">Monitoreo de Sensores</h1>
+
+    <div class="container">
+        <div class="content-sensores">
+            <!-- Tarjeta para el sensor MQ-2 -->
+            <div id="sensor-mq2" class="card">
+                <p>Sensor MQ-2 - Nivel de gas: <span id="mq2_value">0</span></p>
+            </div>
+            <!-- Tarjeta para el sensor MQ-4 -->
+            <div id="sensor-mq4" class="card">
+                <p>Sensor MQ-4 - Nivel de gas: <span id="mq4_value">0</span></p>
+            </div>
+            <!-- Tarjeta para el sensor MQ-5 -->
+            <div id="sensor-mq5" class="card">
+                <p>Sensor MQ-5 - Nivel de gas: <span id="mq5_value">0</span></p>
+            </div>
+            <!-- Tarjeta para el sensor MQ-7 -->
+            <div id="sensor-mq7" class="card">
+                <p>Sensor MQ-7 - Nivel de gas: <span id="mq7_value">0</span></p>
+            </div>
+            <!-- Tarjeta para el sensor MQ-137 -->
+            <div id="sensor-mq137" class="card">
+                <p>Sensor MQ-137 - Nivel de gas: <span id="mq137_value">0</span></p>
+            </div>
+        </div>
+
+        <!-- Sección lateral con datos de temperatura y humedad -->
+        <div class="sidebar">
+            <h2>Condiciones Ambientales</h2>
+            <p>Temperatura: <span id="temp_value">0</span> °C</p>
+            <p>Humedad: <span id="humidity_value">0</span> %</p>
+            <img src="imagenes/temperatura-de-agua.png" alt="Imagen representativa de la temperatura y humedad" class="img_temperatura">
+        </div>
+    </div>
+
+    <div id="alerta" style="display: none;">¡ALERTA! Nivel de gas crítico</div>
+
+    <script>
+        let socket;
+
+        // Función para conectar al WebSocket
+        function conectarWebSocket() {
+            socket = new WebSocket('wss://proyectocleanair-production-3367.up.railway.app');
+
+            // Evento cuando se recibe un mensaje del servidor
+            socket.onmessage = function (event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("Datos recibidos:", data);
+                    
+
+                    actualizarValores(data);
+                } catch (error) {
+                    console.error('Error al procesar los datos:', error);
+                }
+            };
+
+            socket.onopen = function () {
+                console.log('Conectado al WebSocket');
+            };
+
+            socket.onerror = function (error) {
+                console.error('Error en WebSocket:', error);
+                alert('Hubo un error con la conexión.');
+            };
+
+            socket.onclose = function () {
+                console.log('Conexión WebSocket cerrada');
+                alert('Conexión cerrada. Intentando reconectar...');
+                setTimeout(conectarWebSocket, 3000);
+            };
+        }
+
+        // Actualizar los valores de los sensores
+    function actualizarValores(data) {
+        let tarjetaSensor;
+
+        // Asignar la tarjeta correspondiente al sensor detectado
+        if (data.sensor === "MQ-2") {
+            tarjetaSensor = document.getElementById('sensor-mq2');
+            document.getElementById('mq2_value').innerText = data.gas_level;
+        } else if (data.sensor === "MQ-4") {
+            tarjetaSensor = document.getElementById('sensor-mq4');
+            document.getElementById('mq4_value').innerText = data.gas_level;
+        } else if (data.sensor === "MQ-5") {
+            tarjetaSensor = document.getElementById('sensor-mq5');
+            document.getElementById('mq5_value').innerText = data.gas_level;
+        } else if (data.sensor === "MQ-7") {
+            tarjetaSensor = document.getElementById('sensor-mq7');
+            document.getElementById('mq7_value').innerText = data.gas_level;
+        } else if (data.sensor === "MQ-137") {
+            tarjetaSensor = document.getElementById('sensor-mq137');
+            document.getElementById('mq137_value').innerText = data.gas_level;
+        }
+
+        // Comprobar los rangos para definir el color de la tarjeta
+        if (tarjetaSensor) {
+            let nivelGas = data.gas_level;
+
+            // Verde: Nivel seguro (0 - 300 ppm)
+            if (nivelGas >= 0 && nivelGas <= 300) {
+                tarjetaSensor.style.backgroundColor = 'lightgreen';
+            }
+            // Amarillo: Precaución (300 - 700 ppm)
+            else if (nivelGas > 300 && nivelGas <= 700) {
+                tarjetaSensor.style.backgroundColor = 'yellow';
+            }
+            // Rojo: Peligro (> 700 ppm)
+            else if (nivelGas > 700) {
+                tarjetaSensor.style.backgroundColor = 'red';
+            }
+        }
+    }
+
+
+
+        conectarWebSocket();
+    </script>
+
+    <h3>Colores y rangos de detección.</h3>
+    <p>
+        1. Verde (Normal): Cuando el sensor detecta un valor "0" o un valor muy bajo, significa que la concentración de gas es segura y no representa ningún peligro. Este es el estado normal.
+        Rango aproximado: 0 - 200 ppm (partes por millón).
+        <br>
+        2. Amarillo (Precaución): Aquí el sensor detecta una concentración moderada de gas que, aunque no es inmediatamente peligrosa, requiere que el usuario tome precauciones. Es un aviso de que la situación podría empeorar.
+        Rango aproximado: 300 ppm - 700 ppm.
+        <br>
+        3. Rojo (Peligro): Este estado indica que el nivel de gas ha superado un umbral peligroso, y la concentración de gas es lo suficientemente alta como para representar un riesgo para la salud o la seguridad.
+        Rango aproximado: > 700 ppm.
+    </p>  
+    <h3>Sensores. </h3>  
+    <p>
+        1. MQ-2: es un sensor de gas inflamable y humo que detecta las concentraciones de gas combustible en el aire. El sensor de gas MQ-2 es sensible a; GLP, propano, metano, alcohol, hidrógeno, humo. Siendo más sensible al GLP y propano. <br>
+        2. MQ-4: es un sensor de gas que detecta principalmente metano (CH4) y otros gases inflamables en el aire. <br>
+        3. MQ-5: es un sensor de gas que está diseñado para detectar los siguientes gases inflamables: GLP (Gas Licuado de Petróleo), gas natural - Metano (CH4), Hidrógeno (H2). <br>
+        4. MQ-7: el sensor MQ-7 es extremadamente sensible al monóxido de carbono (CO) el cuál es especialmente peligroso porque es indetectable para los sentidos humanos y puede acumularse en espacios cerrados debido a la combustión incompleta de combustibles. <br>
+        5. MQ-137: el sensor MQ-137 está diseñado para detectar principalmente amoníaco (NH3). Es altamente sensible a este gas y otros gases. <br>
+        6. DHT22: el sensor DHT22 es un dispositivo versátil que mide la temperatura y la humedad relativa del ambiente
+    </p>
+
+
+    
+</body>
+<!-- Footer -->
+<footer class="footer">
+    <div class="contact">
+        <h3>Contactos</h3>
+        <p>Nicolas Dominguez - Lucas Medina</p>
+        <p>Email: <a href="mailto:nicolasdominguez180804@gmail.com">nicolasdominguez180804@gmail.com</a></p>
+
+        <p>Email: <a href="mailto:lucasdmediluca1@gmail.com">lucasdmediluca1@gmail.com</a></p>
+
+    </div>
+    
+    <hr class="separator">
+
+    <div class="copyright">
+        <p>&copy; 2024 CleanAir. Todos los derechos reservados.</p>
+    </div>
+</footer>
+</html>

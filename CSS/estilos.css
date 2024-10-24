@@ -1,0 +1,119 @@
+/* Estilos generales */
+body {
+    font-family: "Arima", system-ui;
+    font-optical-sizing: auto;
+    margin: 10px;
+    padding: 0;
+    background-color: #e3f2fd;  
+}
+
+/* Contenedor principal */
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px 20px 20px;  
+    flex-wrap: wrap; /* Permite que los elementos se ajusten automáticamente en pantallas pequeñas */
+}
+
+/* Contenedor para los sensores */
+.content-sensores {
+    width: 65%;
+}
+
+.titulo{
+    text-align: left;
+}
+
+.titulo2 {
+    padding-top: 0;
+    color: #1976d2;
+    margin-top: -10px; 
+}
+
+/* Tarjetas de los sensores */
+.card {
+    background-color: #bbdefb;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Sección lateral */
+.sidebar {
+    background-color: #bbdefb;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 30%;
+    text-align: center;
+}
+
+/* Imagen en la sección lateral */
+.img_temperatura {
+    width: 50%;
+    max-height: 100px;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+
+
+/* Estilos para el footer */
+.footer {
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.footer .contact h3 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+.footer .contact p {
+    margin: 5px 0;
+}
+
+.footer .separator {
+    width: 80%;
+    margin: 20px auto;
+}
+
+.footer .copyright {
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Cambia la orientación de los elementos al apilarlos */
+        align-items: center;
+    }
+
+    .content-sensores, .sidebar {
+        width: 100%; /* Asegura que ambos bloques ocupen todo el ancho en pantallas pequeñas */
+        margin-bottom: 20px;
+    }
+
+    .titulo, .titulo2 {
+        text-align: center;
+    }
+}
+
+/* Media query para pantallas muy pequeñas (móviles) */
+@media (max-width: 480px) {
+    .card {
+        padding: 10px;
+    }
+
+    .sidebar {
+        padding: 15px;
+    }
+
+    .img_temperatura {
+        width: 80%; /* Aumenta el tamaño de la imagen en móviles */
+    }
+}
